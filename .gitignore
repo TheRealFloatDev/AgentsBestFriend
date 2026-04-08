@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.abf/
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Build artifacts
+coverage/
+*.log
+.turbo
