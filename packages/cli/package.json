@@ -24,12 +24,9 @@
     "@abf/core": "*",
     "@abf/server": "*",
     "@clack/prompts": "^0.9.0",
-    "commander": "^13.0.0",
-    "express": "^5.2.1",
-    "open": "^11.0.0"
+    "commander": "^13.0.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.6",
     "vitest": "^3.0.0"
   }
 }

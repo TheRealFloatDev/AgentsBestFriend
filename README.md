@@ -118,7 +118,7 @@ abf index [path] Re-index a project
 abf status [path] Show index status
 abf config       Interactive configuration editor
 abf doctor       System health checks
-abf portal       Launch web management portal
+abf portal       Interactive terminal dashboard
 ```
 
 ## Architecture
@@ -128,8 +128,8 @@ AgentsBestFriend/
 ├── packages/
 │   ├── core/         Shared logic — DB, config, search, analysis, indexer, LLM
 │   ├── server/       MCP server with all 11 tools
-│   ├── cli/          Commander.js CLI + portal backend (Express)
-│   └── portal/       React + Vite + Tailwind management UI
+│   ├── cli/          Commander.js CLI + interactive TUI portal
+│   └── portal/       (placeholder — UI logic lives in CLI TUI)
 ├── turbo.json        Turborepo build config
 └── package.json      npm workspaces root
 ```
@@ -202,18 +202,21 @@ Global config lives at `~/.abf/config.json`:
 }
 ```
 
-Edit interactively with `abf config` or through the web portal.
+Edit interactively with `abf config` or `abf portal`.
 
-## Management Portal
+## Terminal Portal
 
 ```bash
 abf portal
 ```
 
-Opens a web UI at `http://localhost:4242` with:
+Interactive TUI dashboard powered by [@clack/prompts](https://github.com/bombshell-dev/clack):
 
-- **Dashboard** — health checks, LLM provider status
-- **Configuration** — edit all settings with a form UI
+- **Dashboard** — system overview, health checks, LLM status, project index stats
+- **Project Status** — detailed index info for any project path
+- **Re-index** — trigger a full re-index from the menu
+- **Configuration** — edit LLM provider, indexing, and other settings
+- **Doctor** — health checks for Node.js, ripgrep, git, Ollama
 
 ## Tech Stack
 
@@ -224,7 +227,6 @@ Opens a web UI at `http://localhost:4242` with:
 - **AST:** ts-morph (TypeScript/JavaScript)
 - **Search:** ripgrep + custom keyword scorer + cosine similarity
 - **CLI:** Commander.js + @clack/prompts
-- **Portal:** React 19 + Vite 6 + Tailwind CSS v4
 - **LLM:** Ollama (local, optional)
 
 ## Development

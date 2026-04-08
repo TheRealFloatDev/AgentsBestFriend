@@ -37,7 +37,7 @@ program
 
 program
   .command("portal")
-  .description("Start the web management portal")
+  .description("Interactive terminal dashboard for managing ABF")
   .action(async () => {
     const { portalCommand } = await import("./commands/portal.js");
     await portalCommand();
