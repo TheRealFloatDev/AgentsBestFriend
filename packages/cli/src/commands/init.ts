@@ -43,7 +43,15 @@ export async function initCommand(projectPath: string): Promise<void> {
   const s = clack.spinner();
   s.start("Running initial index...");
 
-  const stats = await runIndexPipeline(root);
+  let stats;
+  try {
+    stats = await runIndexPipeline(root);
+  } catch (err) {
+    s.stop("Indexing failed");
+    const msg = err instanceof Error ? (err.stack ?? err.message) : String(err);
+    clack.log.error(msg);
+    process.exit(1);
+  }
   s.stop("Indexing complete");
 
   clack.log.info(
