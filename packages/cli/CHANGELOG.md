@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.1.3
+
+### Patch Changes
+
+- Improved error handling
+
 ## 0.1.2
 
 ### Patch Changes
