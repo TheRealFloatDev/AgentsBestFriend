@@ -8,9 +8,12 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "clean": "turbo clean",
-    "release": "turbo build && cd packages/cli && pnpm publish"
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.30.0",
     "turbo": "^2.4.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
