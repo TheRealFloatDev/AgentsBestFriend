@@ -126,7 +126,7 @@ export async function initCommand(projectPath: string): Promise<void> {
     });
     mcpSpinner.stop("MCP server installed successfully");
     clack.log.info(
-      `Agents can now use ABF via the "abf start" command.\nMake sure abf is installed globally: npm install -g @abf/cli`,
+      `Agents can now use ABF via the "abf start" command.\nMake sure abf is installed globally: npm install -g agentsbestfriend`,
     );
   } catch (err) {
     mcpSpinner.stop("MCP installation failed");
