@@ -1,6 +1,6 @@
 {
   "name": "@abf/core",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -39,6 +39,10 @@
     "./llm": {
       "import": "./dist/llm/index.js",
       "types": "./dist/llm/index.d.ts"
+    },
+    "./notes": {
+      "import": "./dist/notes/index.js",
+      "types": "./dist/notes/index.d.ts"
     }
   },
   "scripts": {

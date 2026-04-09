@@ -13,6 +13,7 @@ import { registerImpactTool } from "./tools/impact.js";
 import { registerFileSummaryTool } from "./tools/file-summary.js";
 import { registerConventionsTool } from "./tools/conventions.js";
 import { registerContextBundleTool } from "./tools/context-bundle.js";
+import { registerNotesTool } from "./tools/notes.js";
 
 const SERVER_NAME = "agents-best-friend";
 const SERVER_VERSION = __ABF_VERSION__;
@@ -50,6 +51,7 @@ export function createAbfServer(): McpServer {
   registerFileSummaryTool(server);
   registerConventionsTool(server);
   registerContextBundleTool(server);
+  registerNotesTool(server);
 
   return server;
 }

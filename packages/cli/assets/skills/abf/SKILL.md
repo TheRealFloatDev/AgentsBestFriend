@@ -10,6 +10,7 @@ ABF is a local MCP server that provides AI-optimized tools for navigating, searc
 ## When to Use ABF Tools
 
 **Always prefer ABF tools when you need to:**
+
 - Understand a project's structure or tech stack
 - Search for code across files (exact, keyword, or semantic)
 - Read specific functions or classes from large files
@@ -18,6 +19,7 @@ ABF is a local MCP server that provides AI-optimized tools for navigating, searc
 - Get multi-file context around an entry point
 
 **Use native tools only when:**
+
 - Making edits to files (ABF is read-only)
 - Checking for lint/compile errors
 - Running terminal commands
@@ -25,19 +27,20 @@ ABF is a local MCP server that provides AI-optimized tools for navigating, searc
 
 ## Decision Matrix
 
-| Task | ABF Tool | Instead of |
-|------|----------|------------|
-| Orient in a new project | `abf_project_overview` | Reading README + listing directories + checking package.json |
-| Find where something is defined | `abf_search` (exact mode) | `grep_search` |
-| Find files related to a concept | `abf_search` (keyword mode) | Multiple `semantic_search` + `grep_search` calls |
-| Read a specific function from a large file | `abf_chunk` with symbol name | `read_file` (which loads entire file or requires guessing line ranges) |
-| List all exports of a file | `abf_symbols` | `read_file` and scanning manually |
-| Understand what a file imports and who imports it | `abf_dependencies` | Multiple `grep_search` calls for import statements |
-| Get multi-file context around one entry point | `abf_context_bundle` | 5–10 calls to `read_file` + `abf_symbols` + `abf_dependencies` |
-| Find all usages of a function/class | `abf_impact` | `grep_search` with manual filtering |
-| Understand project conventions | `abf_conventions` | Reading multiple config files manually |
-| Search by file purpose/description | `abf_file_summary` | No native equivalent |
-| Check git history or blame | `abf_git` | `run_in_terminal` with git commands |
+| Task                                              | ABF Tool                     | Instead of                                                             |
+| ------------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------- |
+| Orient in a new project                           | `abf_project_overview`       | Reading README + listing directories + checking package.json           |
+| Find where something is defined                   | `abf_search` (exact mode)    | `grep_search`                                                          |
+| Find files related to a concept                   | `abf_search` (keyword mode)  | Multiple `semantic_search` + `grep_search` calls                       |
+| Read a specific function from a large file        | `abf_chunk` with symbol name | `read_file` (which loads entire file or requires guessing line ranges) |
+| List all exports of a file                        | `abf_symbols`                | `read_file` and scanning manually                                      |
+| Understand what a file imports and who imports it | `abf_dependencies`           | Multiple `grep_search` calls for import statements                     |
+| Get multi-file context around one entry point     | `abf_context_bundle`         | 5–10 calls to `read_file` + `abf_symbols` + `abf_dependencies`         |
+| Find all usages of a function/class               | `abf_impact`                 | `grep_search` with manual filtering                                    |
+| Understand project conventions                    | `abf_conventions`            | Reading multiple config files manually                                 |
+| Search by file purpose/description                | `abf_file_summary`           | No native equivalent                                                   |
+| Check git history or blame                        | `abf_git`                    | `run_in_terminal` with git commands                                    |
+| Persist notes / context across sessions           | `abf_notes`                  | External files, comments, or memory tools                              |
 
 ## Recommended Workflows
 
@@ -82,25 +85,40 @@ ABF is a local MCP server that provides AI-optimized tools for navigating, searc
 - Semantic similarity?       → abf_search mode: "semantic" (requires Ollama)
 ```
 
+### 6. Cross-Session Memory
+
+```
+1. abf_notes action: "save" (title, content, tags)  → persist decisions, context, TODOs
+2. abf_notes action: "search" (query)                → recall notes by keyword (FTS5)
+3. abf_notes action: "list" (tag: "architecture")    → browse notes by tag
+4. abf_notes action: "update" / "delete"              → maintain your notepad
+```
+
 ## Tool Reference
 
 ### abf_project_overview
+
 **When:** Starting work on a project, or when asked "what does this project do?"
 **Saves:** Reading README + package.json + listing directories manually (3–5 calls → 1)
+
 - Returns: tech stack, frameworks, entry points, directory structure, language distribution, architectural patterns
 - No index required — works immediately
 
 ### abf_search
+
 **When:** Looking for code, files, or patterns across the project
 **Saves:** Multiple grep_search or semantic_search calls
+
 - `mode: "exact"` — ripgrep-powered, supports regex, returns matching lines with context
 - `mode: "keyword"` — scores every file by keyword density, best for exploration
 - `mode: "semantic"` — embedding similarity (requires Ollama + index with embeddings)
 - Use `path_filter` to narrow scope (e.g. `"src/**/*.ts"`)
 
 ### abf_context_bundle
+
 **When:** You need to understand a file in the context of its dependencies
 **Saves:** 5–10 calls to read_file + abf_symbols + abf_dependencies (biggest saver)
+
 - `include: "smart"` (default) — full source for entry, signatures for deps
 - `include: "signatures"` — compact type signatures only (minimal tokens)
 - `include: "full"` — full source code for all files up to depth
@@ -109,53 +127,85 @@ ABF is a local MCP server that provides AI-optimized tools for navigating, searc
 - `depth: 0–4` — how far to follow the import graph
 
 ### abf_chunk
+
 **When:** You need to read a specific function/class from a file without loading the entire file
 **Saves:** read_file loading hundreds of irrelevant lines
+
 - Call with `symbol: "functionName"` to get its full source code directly
 - Call without symbol first to get a chunk overview, then use `chunk_index` to retrieve specific sections
 
 ### abf_symbols
+
 **When:** You need to see what a file exports without reading its full content
 **Saves:** read_file + mentally parsing the file structure
+
 - Returns: function signatures, classes, interfaces, types, variables with line ranges
 - Shows export status (★ = exported) and nesting
 
 ### abf_dependencies
+
 **When:** Tracing what a file imports or finding who depends on it
 **Saves:** Multiple grep_search calls for import statements
+
 - Returns both imports and reverse dependencies (imported_by)
 
 ### abf_impact
+
 **When:** Assessing how widely a symbol is used before changing it
 **Saves:** grep_search + manual filtering of false positives
+
 - Returns all files and specific lines that reference the symbol
 - Classifies usage type (call, import, type reference, etc.)
 
 ### abf_file_summary
+
 **When:** Searching by file purpose rather than exact code text
 **Saves:** No native equivalent — unique capability
+
 - Full-text search across LLM-generated file descriptions
 - Requires summaries to be generated first (`abf_index` action: summarize)
 
 ### abf_conventions
+
 **When:** Understanding project style before making changes
 **Saves:** Reading eslint, tsconfig, prettier, and other config files manually
+
 - Detects naming patterns, design patterns, folder structure conventions
 - Returns confidence scores and examples
 
 ### abf_git
+
 **When:** Checking history, blame, or diffs
 **Saves:** Running git commands in terminal and parsing output
+
 - Actions: log, file_history, blame, diff
 - Structured output ready for analysis
 
 ### abf_index
+
 **When:** Managing the ABF index
+
 - `status` — check index health
 - `rebuild` — full re-index
 - `update` — incremental update
 - `summarize` — generate LLM summaries (requires Ollama)
 
 ### abf_ping
+
 **When:** Verifying ABF is running
+
 - Returns server version, project root, and status
+
+### abf_notes
+
+**When:** Persisting context, decisions, TODOs, or any information across agent sessions
+**Saves:** External scratch files, scattered comments, or relying on memory tools
+
+- `action: "save"` — create a note with title, content, and optional comma-separated tags
+- `action: "get"` — retrieve a note by ID or exact title
+- `action: "list"` — browse all notes, optionally filtered by tag
+- `action: "search"` — full-text search (FTS5 with BM25 ranking); supports AND/OR mode
+- `action: "update"` — update title, content, or tags on an existing note by ID
+- `action: "delete"` — remove a note by ID
+- Stored in `.abf/notes.db` — survives re-indexing
+- Project-scoped: each project has its own notepad

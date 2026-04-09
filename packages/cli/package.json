@@ -1,7 +1,7 @@
 {
   "name": "agentsbestfriend",
   "mcpName": "io.github.TheRealFloatDev/agentsbestfriend",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "description": "Give your AI coding agents superpowers — a local MCP server for fast, token-efficient code navigation, search & analysis.",
   "type": "module",
   "license": "MIT",

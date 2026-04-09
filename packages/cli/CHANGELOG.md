@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.12.0
+
+### Minor Changes
+
+- Added new abf_notes tool
+
 ## 0.11.1
 
 ### Patch Changes

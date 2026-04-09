@@ -8,3 +8,4 @@ export * from "./analysis/index.js";
 export * from "./git/index.js";
 export * from "./indexer/index.js";
 export * from "./llm/index.js";
+export * from "./notes/index.js";
