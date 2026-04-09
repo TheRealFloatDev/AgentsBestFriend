@@ -6,14 +6,23 @@ export function registerFileSummaryTool(server: McpServer): void {
   server.tool(
     "abf_file_summary",
     `Search across LLM-generated file summaries using full-text search.
-Returns files whose summaries match the query, ranked by relevance.
+Returns files whose summaries match the query, ranked by relevance (BM25).
 Useful when exploring a codebase by concept rather than exact code text.
-Requires summaries to be generated first (run abf_index with summarize=true, or abf enrichment).`,
+Default mode is "or" — matches files containing ANY of the query terms, ranked by how many match.
+Use "and" mode to require ALL terms to be present.
+Requires summaries to be generated first (run abf_index with action=summarize).`,
     {
       query: z
         .string()
         .describe(
-          "Search query — keywords to match against file summaries (FTS5 syntax supported)",
+          "Search query — space-separated keywords to match against file summaries",
+        ),
+      match_mode: z
+        .enum(["or", "and"])
+        .optional()
+        .default("or")
+        .describe(
+          '"or": match files with ANY keyword (default, broader results). "and": require ALL keywords.',
         ),
       max_results: z
         .number()
@@ -29,13 +38,19 @@ Requires summaries to be generated first (run abf_index with summarize=true, or 
           'Optional prefix filter for file paths, e.g. "src/" or "packages/core"',
         ),
     },
-    async ({ query, max_results, path_filter }) => {
+    async ({ query, match_mode, max_results, path_filter }) => {
       const projectRoot = process.env.ABF_PROJECT_ROOT || process.cwd();
 
       try {
         const db = createProjectDb(projectRoot);
 
         try {
+          // Build FTS5 query: default OR between terms, optionally AND
+          const ftsQuery =
+            match_mode === "and"
+              ? query // FTS5 default is AND between terms
+              : query.split(/\s+/).filter(Boolean).join(" OR ");
+
           // Use FTS5 MATCH for full-text search on summaries
           // bm25() returns negative values (more negative = more relevant)
           let sqlQuery = sql`
@@ -47,7 +62,7 @@ Requires summaries to be generated first (run abf_index with summarize=true, or 
               bm25(files_fts) AS rank
             FROM files_fts
             JOIN files f ON files_fts.rowid = f.id
-            WHERE files_fts MATCH ${query}
+            WHERE files_fts MATCH ${ftsQuery}
           `;
 
           if (path_filter) {
@@ -60,7 +75,7 @@ Requires summaries to be generated first (run abf_index with summarize=true, or 
                 bm25(files_fts) AS rank
               FROM files_fts
               JOIN files f ON files_fts.rowid = f.id
-              WHERE files_fts MATCH ${query}
+              WHERE files_fts MATCH ${ftsQuery}
                 AND f.path LIKE ${path_filter + "%"}
             `;
           }

@@ -83,8 +83,8 @@ export async function initCommand(projectPath: string): Promise<void> {
       llmSpinner.stop(
         `Summaries: ${sumStats.generated} generated, ${sumStats.skipped} skipped (${sumStats.durationMs}ms)`,
       );
-    } catch {
-      llmSpinner.stop("Summary generation failed (Ollama error)");
+    } catch (err: any) {
+      llmSpinner.stop(`Summary generation failed: ${err.message ?? err}`);
     }
 
     const embSpinner = clack.spinner();
@@ -94,8 +94,11 @@ export async function initCommand(projectPath: string): Promise<void> {
       embSpinner.stop(
         `Embeddings: ${embStats.generated} generated, ${embStats.skipped} skipped (${embStats.durationMs}ms)`,
       );
-    } catch {
-      embSpinner.stop("Embedding generation failed (Ollama error)");
+    } catch (err: any) {
+      embSpinner.stop(`Embedding generation failed: ${err.message ?? err}`);
+      clack.log.warn(
+        "Make sure the embedding model is pulled: ollama pull nomic-embed-text",
+      );
     }
   } else {
     clack.log.info(
