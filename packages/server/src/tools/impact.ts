@@ -12,7 +12,7 @@ export function registerImpactTool(server: McpServer): void {
     "abf_impact",
     "Find all files and lines that reference a given symbol name. Useful for change impact analysis.",
     {
-      symbol_name: z
+      symbol: z
         .string()
         .describe(
           "The symbol (function, class, variable) name to find references for",
@@ -24,13 +24,13 @@ export function registerImpactTool(server: McpServer): void {
           "Optional: scope search to usages of this symbol from this file",
         ),
     },
-    async ({ symbol_name, file_path }) => {
+    async ({ symbol, file_path }) => {
       const cwd = process.env.ABF_PROJECT_ROOT || process.cwd();
 
       try {
         // Use ripgrep to find all occurrences of the symbol name
         const results = await ripgrepSearch({
-          query: `\\b${escapeRegex(symbol_name)}\\b`,
+          query: `\\b${escapeRegex(symbol)}\\b`,
           cwd,
           maxResults: 50,
           regex: true,
@@ -42,7 +42,7 @@ export function registerImpactTool(server: McpServer): void {
             content: [
               {
                 type: "text" as const,
-                text: `No references found for "${symbol_name}".`,
+                text: `No references found for "${symbol}".`,
               },
             ],
           };
@@ -58,13 +58,13 @@ export function registerImpactTool(server: McpServer): void {
           group.push({
             line: match.lineNumber,
             text: match.lineText.trim(),
-            usage: classifyUsage(match.lineText, symbol_name),
+            usage: classifyUsage(match.lineText, symbol),
           });
           byFile.set(match.filePath, group);
         }
 
         const lines: string[] = [
-          `${results.totalMatches} references to "${symbol_name}" in ${byFile.size} files:`,
+          `${results.totalMatches} references to "${symbol}" in ${byFile.size} files:`,
           "",
         ];
 

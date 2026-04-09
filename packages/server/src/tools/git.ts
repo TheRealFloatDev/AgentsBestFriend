@@ -18,7 +18,7 @@ export function registerGitTool(server: McpServer): void {
       action: GitActionSchema.describe(
         "Git action: log (recent commits), file_history, blame, diff",
       ),
-      file: z
+      file_path: z
         .string()
         .optional()
         .describe(
@@ -42,7 +42,7 @@ export function registerGitTool(server: McpServer): void {
         .optional()
         .describe("End line for blame range"),
     },
-    async ({ action, file, count, line_start, line_end }) => {
+    async ({ action, file_path, count, line_start, line_end }) => {
       const cwd = process.env.ABF_PROJECT_ROOT || process.cwd();
 
       if (!(await isGitRepo(cwd))) {
@@ -66,29 +66,31 @@ export function registerGitTool(server: McpServer): void {
             break;
           }
           case "file_history": {
-            if (!file) {
-              return errorResult("file_history requires a `file` parameter.");
+            if (!file_path) {
+              return errorResult(
+                "file_history requires a `file_path` parameter.",
+              );
             }
-            const history = await getFileHistory(cwd, file, count);
+            const history = await getFileHistory(cwd, file_path, count);
             text =
               `History for ${history.filePath}:\n` +
               formatCommits(history.commits);
             break;
           }
           case "blame": {
-            if (!file) {
-              return errorResult("blame requires a `file` parameter.");
+            if (!file_path) {
+              return errorResult("blame requires a `file_path` parameter.");
             }
             const range =
               line_start && line_end
                 ? ([line_start, line_end] as [number, number])
                 : undefined;
-            const blameLines = await getBlame(cwd, file, range);
+            const blameLines = await getBlame(cwd, file_path, range);
             text = formatBlame(blameLines);
             break;
           }
           case "diff": {
-            const diff = await getDiff(cwd, file);
+            const diff = await getDiff(cwd, file_path);
             const { filesChanged, insertions, deletions } = diff.stats;
             const header = `${filesChanged} file(s) changed, +${insertions} -${deletions}`;
             text = diff.combined
