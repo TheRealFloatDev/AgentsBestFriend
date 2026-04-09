@@ -22,6 +22,12 @@ export interface EmbeddingStats {
   durationMs: number;
 }
 
+export type ProgressCallback = (
+  current: number,
+  total: number,
+  filePath: string,
+) => void;
+
 // ─── Summary Pipeline ────────────────────────────────────────────────────────
 
 /**
@@ -30,7 +36,7 @@ export interface EmbeddingStats {
  */
 export async function generateSummaries(
   projectRoot: string,
-  opts?: { force?: boolean; batchSize?: number },
+  opts?: { force?: boolean; batchSize?: number; onProgress?: ProgressCallback },
 ): Promise<SummaryStats> {
   const start = Date.now();
   const provider = getLlmProvider();
@@ -83,6 +89,12 @@ export async function generateSummaries(
           if (err instanceof LlmUnavailableError) throw err;
           stats.errors++;
         }
+
+        opts?.onProgress?.(
+          stats.generated + stats.errors,
+          rows.length,
+          row.path,
+        );
       }
     }
 
@@ -106,7 +118,7 @@ export async function generateSummaries(
  */
 export async function generateEmbeddings(
   projectRoot: string,
-  opts?: { force?: boolean; batchSize?: number },
+  opts?: { force?: boolean; batchSize?: number; onProgress?: ProgressCallback },
 ): Promise<EmbeddingStats> {
   const start = Date.now();
   const provider = getLlmProvider();
@@ -183,6 +195,12 @@ export async function generateEmbeddings(
           if (err instanceof LlmUnavailableError) throw err;
           stats.errors++;
         }
+
+        opts?.onProgress?.(
+          stats.generated + stats.errors,
+          needsEmbedding.length,
+          row.path,
+        );
       }
     }
 

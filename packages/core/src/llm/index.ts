@@ -6,6 +6,7 @@ export {
   generateEmbeddings,
   type SummaryStats,
   type EmbeddingStats,
+  type ProgressCallback,
 } from "./pipelines.js";
 
 import { loadConfig } from "../config/manager.js";

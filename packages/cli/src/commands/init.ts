@@ -79,7 +79,10 @@ export async function initCommand(projectPath: string): Promise<void> {
     const llmSpinner = clack.spinner();
     llmSpinner.start("Generating LLM summaries...");
     try {
-      const sumStats = await generateSummaries(root);
+      const sumStats = await generateSummaries(root, {
+        onProgress: (done, total) =>
+          llmSpinner.message(`Generating LLM summaries... (${done}/${total})`),
+      });
       llmSpinner.stop(
         `Summaries: ${sumStats.generated} generated, ${sumStats.skipped} skipped (${sumStats.durationMs}ms)`,
       );
@@ -90,7 +93,10 @@ export async function initCommand(projectPath: string): Promise<void> {
     const embSpinner = clack.spinner();
     embSpinner.start("Generating embeddings...");
     try {
-      const embStats = await generateEmbeddings(root);
+      const embStats = await generateEmbeddings(root, {
+        onProgress: (done, total) =>
+          embSpinner.message(`Generating embeddings... (${done}/${total})`),
+      });
       embSpinner.stop(
         `Embeddings: ${embStats.generated} generated, ${embStats.skipped} skipped (${embStats.durationMs}ms)`,
       );
