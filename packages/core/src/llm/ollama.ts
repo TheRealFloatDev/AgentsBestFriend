@@ -70,30 +70,59 @@ Summary:`;
   }
 
   async generateEmbedding(text: string): Promise<Float32Array> {
-    // Truncate for embedding model context window
-    const maxChars = 8000;
-    const truncated = text.length > maxChars ? text.slice(0, maxChars) : text;
+    // nomic-embed-text supports ~8192 tokens. We chunk at ~3500 chars
+    // (≈ 1000 tokens) to stay safely within the limit, embed each chunk,
+    // then mean-pool the vectors into a single embedding.
+    const chunkSize = 3500;
+    const chunks: string[] = [];
 
-    const res = await fetch(`${this.baseUrl}/api/embed`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: this.embeddingModel,
-        input: truncated,
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text();
-      throw new LlmUnavailableError("ollama", `embed ${res.status}: ${body}`);
+    if (text.length <= chunkSize) {
+      chunks.push(text);
+    } else {
+      for (let i = 0; i < text.length; i += chunkSize) {
+        const chunk = text.slice(i, i + chunkSize);
+        if (chunk.trim().length > 0) chunks.push(chunk);
+      }
     }
 
-    const data = (await res.json()) as { embeddings: number[][] };
-    if (!data.embeddings?.[0]) {
-      throw new Error("Empty embedding response from Ollama");
+    const vectors: Float32Array[] = [];
+
+    for (const chunk of chunks) {
+      const res = await fetch(`${this.baseUrl}/api/embed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: this.embeddingModel,
+          input: chunk,
+          truncate: true,
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.text();
+        throw new LlmUnavailableError("ollama", `embed ${res.status}: ${body}`);
+      }
+
+      const data = (await res.json()) as { embeddings: number[][] };
+      if (!data.embeddings?.[0]) {
+        throw new Error("Empty embedding response from Ollama");
+      }
+
+      vectors.push(new Float32Array(data.embeddings[0]));
     }
 
-    return new Float32Array(data.embeddings[0]);
+    // Single chunk — return directly
+    if (vectors.length === 1) return vectors[0];
+
+    // Mean-pool all chunk vectors
+    const dim = vectors[0].length;
+    const mean = new Float32Array(dim);
+    for (const v of vectors) {
+      for (let i = 0; i < dim; i++) mean[i] += v[i];
+    }
+    for (let i = 0; i < dim; i++) mean[i] /= vectors.length;
+
+    return mean;
   }
 
   async listModels(): Promise<ModelInfo[]> {
