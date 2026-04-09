@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.11.1
+
+### Patch Changes
+
+- Added -y flag to npx for mcp server
+
 ## 0.11.0
 
 ### Minor Changes
