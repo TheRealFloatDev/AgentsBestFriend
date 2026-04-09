@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.7.2
+
+### Patch Changes
+
+- added new bin alias
+
 ## 0.7.1
 
 ### Patch Changes
