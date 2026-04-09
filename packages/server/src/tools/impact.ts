@@ -25,7 +25,7 @@ export function registerImpactTool(server: McpServer): void {
         ),
     },
     async ({ symbol_name, file_path }) => {
-      const cwd = process.cwd();
+      const cwd = process.env.ABF_PROJECT_ROOT || process.cwd();
 
       try {
         // Use ripgrep to find all occurrences of the symbol name

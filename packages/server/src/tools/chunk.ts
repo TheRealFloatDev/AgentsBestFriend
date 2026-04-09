@@ -8,31 +8,67 @@ import type { ParsedSymbol } from "@abf/core/analysis";
 export function registerChunkTool(server: McpServer): void {
   server.tool(
     "abf_chunk",
-    "Smart file chunking by symbol boundaries. Without chunk_index: returns chunk overview. With chunk_index: returns that chunk's content.",
+    `Smart file chunking by symbol boundaries. Returns actual source code.
+Use EXACTLY ONE of these modes:
+- symbol: pass a symbol name to get its full source code directly
+- chunk_index: pass a 0-based chunk index to get that chunk's code
+- (neither): returns a chunk overview listing — use this first to discover available chunks, then call again with chunk_index to retrieve code`,
     {
-      file_path: z.string().describe("Path to the file"),
+      file_path: z.string().describe("Path to the file (relative or absolute)"),
       chunk_index: z
         .number()
         .int()
         .min(0)
         .optional()
         .describe(
-          "Request a specific chunk by index (0-based). Omit for overview.",
+          "0-based chunk index to retrieve that chunk's source code. Get the index from the overview first.",
+        ),
+      symbol: z
+        .string()
+        .optional()
+        .describe(
+          "Name of a symbol (function, class, etc.) to retrieve its full source code directly.",
         ),
     },
-    async ({ file_path, chunk_index }) => {
-      const cwd = process.cwd();
+    async ({ file_path, chunk_index, symbol }) => {
+      const projectRoot = process.env.ABF_PROJECT_ROOT || process.cwd();
       const absPath = file_path.startsWith("/")
         ? file_path
-        : join(cwd, file_path);
+        : join(projectRoot, file_path);
 
       try {
         const content = readFileSync(absPath, "utf-8");
         const lines = content.split("\n");
-        const { symbols } = parseFile(absPath, content);
+        const { symbols: parsedSymbols } = parseFile(absPath, content);
 
-        const chunks = buildChunks(symbols, lines.length);
+        // Mode 1: symbol name lookup — return that symbol's source code
+        if (symbol) {
+          const match = findSymbol(parsedSymbols, symbol);
+          if (!match) {
+            const available = parsedSymbols
+              .map((s) => `${s.kind} ${s.name}`)
+              .join(", ");
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: `Symbol "${symbol}" not found in ${file_path}. Available: ${available || "(none)"}`,
+                },
+              ],
+            };
+          }
+          const chunkLines = lines.slice(match.startLine - 1, match.endLine);
+          const text = [
+            `${match.kind} ${match.name} (L${match.startLine}-${match.endLine})`,
+            "---",
+            ...chunkLines,
+          ].join("\n");
+          return { content: [{ type: "text" as const, text }] };
+        }
 
+        const chunks = buildChunks(parsedSymbols, lines.length);
+
+        // Mode 2: chunk_index — return that chunk's source code
         if (chunk_index !== undefined) {
           if (chunk_index < 0 || chunk_index >= chunks.length) {
             return {
@@ -54,7 +90,7 @@ export function registerChunkTool(server: McpServer): void {
           return { content: [{ type: "text" as const, text }] };
         }
 
-        // Overview mode
+        // Mode 3: Overview — list all chunks so the agent knows what to request
         const overview = chunks
           .map(
             (c, i) =>
@@ -62,7 +98,7 @@ export function registerChunkTool(server: McpServer): void {
           )
           .join("\n");
 
-        const text = `${chunks.length} chunks in ${file_path}:\n${overview}`;
+        const text = `${chunks.length} chunks in ${file_path}:\n${overview}\n\nTo get source code, call again with chunk_index=<number> or symbol=<name>.`;
         return { content: [{ type: "text" as const, text }] };
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -70,6 +106,23 @@ export function registerChunkTool(server: McpServer): void {
       }
     },
   );
+}
+
+/**
+ * Find a symbol by name (case-insensitive), searching top-level and children.
+ */
+function findSymbol(
+  symbols: ParsedSymbol[],
+  name: string,
+): ParsedSymbol | undefined {
+  const lower = name.toLowerCase();
+  for (const sym of symbols) {
+    if (sym.name.toLowerCase() === lower) return sym;
+    for (const child of sym.children) {
+      if (child.name.toLowerCase() === lower) return child;
+    }
+  }
+  return undefined;
 }
 
 interface Chunk {

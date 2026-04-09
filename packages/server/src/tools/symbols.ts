@@ -20,7 +20,7 @@ export function registerSymbolsTool(server: McpServer): void {
         .describe("How deep to show nested symbols"),
     },
     async ({ file_path, depth }) => {
-      const cwd = process.cwd();
+      const cwd = process.env.ABF_PROJECT_ROOT || process.cwd();
       const absPath = file_path.startsWith("/")
         ? file_path
         : join(cwd, file_path);

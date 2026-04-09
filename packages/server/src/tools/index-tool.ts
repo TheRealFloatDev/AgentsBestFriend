@@ -1,25 +1,26 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { runIndexPipeline, getIndexStatus } from "@abf/core/indexer";
+import { generateSummaries } from "@abf/core/llm";
 
-const IndexActionSchema = z.enum(["status", "rebuild", "update"]);
+const IndexActionSchema = z.enum(["status", "rebuild", "update", "summarize"]);
 
 export function registerIndexTool(server: McpServer): void {
   server.tool(
     "abf_index",
-    "Manage the file index: check status, trigger rebuild, or incremental update.",
+    "Manage the file index: check status, trigger rebuild, incremental update, or generate LLM summaries (requires Ollama).",
     {
       action: IndexActionSchema.describe(
-        "status: show index info, rebuild: full re-index, update: incremental update",
+        "status: show index info, rebuild: full re-index, update: incremental update, summarize: generate LLM file summaries (requires Ollama)",
       ),
     },
     async ({ action }) => {
-      const cwd = process.cwd();
+      const projectRoot = process.env.ABF_PROJECT_ROOT || process.cwd();
 
       try {
         switch (action) {
           case "status": {
-            const status = await getIndexStatus(cwd);
+            const status = await getIndexStatus(projectRoot);
             const lastUp = status.lastUpdated
               ? status.lastUpdated.toISOString()
               : "never";
@@ -38,7 +39,7 @@ export function registerIndexTool(server: McpServer): void {
           case "rebuild":
           case "update": {
             // Both run the same pipeline — it's always incremental (hash-based)
-            const stats = await runIndexPipeline(cwd);
+            const stats = await runIndexPipeline(projectRoot);
             const text = [
               `Index ${action} complete (${stats.durationMs}ms)`,
               `Discovered: ${stats.totalDiscovered}`,
@@ -46,6 +47,20 @@ export function registerIndexTool(server: McpServer): void {
               `Updated: ${stats.updated}`,
               `Removed: ${stats.removed}`,
               `Unchanged: ${stats.skipped}`,
+              stats.errors > 0 ? `Errors: ${stats.errors}` : null,
+            ]
+              .filter(Boolean)
+              .join("\n");
+
+            return { content: [{ type: "text" as const, text }] };
+          }
+
+          case "summarize": {
+            const stats = await generateSummaries(projectRoot);
+            const text = [
+              `Summary generation complete (${stats.durationMs}ms)`,
+              `Generated: ${stats.generated}`,
+              `Skipped (already have summary): ${stats.skipped}`,
               stats.errors > 0 ? `Errors: ${stats.errors}` : null,
             ]
               .filter(Boolean)

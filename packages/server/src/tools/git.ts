@@ -43,7 +43,7 @@ export function registerGitTool(server: McpServer): void {
         .describe("End line for blame range"),
     },
     async ({ action, file, count, line_start, line_end }) => {
-      const cwd = process.cwd();
+      const cwd = process.env.ABF_PROJECT_ROOT || process.cwd();
 
       if (!(await isGitRepo(cwd))) {
         return {

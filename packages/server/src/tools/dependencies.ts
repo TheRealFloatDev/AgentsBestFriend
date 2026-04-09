@@ -25,7 +25,7 @@ export function registerDependenciesTool(server: McpServer): void {
         .describe("Depth of transitive dependencies"),
     },
     async ({ file_path, direction, depth }) => {
-      const cwd = process.cwd();
+      const cwd = process.env.ABF_PROJECT_ROOT || process.cwd();
       const absPath = file_path.startsWith("/")
         ? file_path
         : join(cwd, file_path);
