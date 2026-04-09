@@ -1,5 +1,16 @@
 # @abf/server
 
+## 0.6.0
+
+### Minor Changes
+
+- Added progress indication for indexing tasks
+
+### Patch Changes
+
+- Updated dependencies
+  - @abf/core@0.7.0
+
 ## 0.5.1
 
 ### Patch Changes

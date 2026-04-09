@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.7.0
+
+### Minor Changes
+
+- Added progress indication for indexing tasks
+
 ## 0.6.1
 
 ### Patch Changes
