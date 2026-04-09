@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "abf": {
+      "command": "abf",
+      "args": [
+        "start"
+      ]
+    }
+  }
+}
