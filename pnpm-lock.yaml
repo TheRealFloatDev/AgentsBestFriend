@@ -23,12 +23,6 @@ importers:
 
   packages/cli:
     dependencies:
-      '@abf/core':
-        specifier: workspace:*
-        version: link:../core
-      '@abf/server':
-        specifier: workspace:*
-        version: link:../server
       '@clack/prompts':
         specifier: ^1.2.0
         version: 1.2.0
@@ -42,6 +36,12 @@ importers:
         specifier: ^27.0.2
         version: 27.0.2
     devDependencies:
+      '@abf/core':
+        specifier: workspace:*
+        version: link:../core
+      '@abf/server':
+        specifier: workspace:*
+        version: link:../server
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
