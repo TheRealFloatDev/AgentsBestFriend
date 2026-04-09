@@ -56,6 +56,7 @@
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "tsup": "^8.5.1",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "@types/node": "^20.19.39"
   }
 }
