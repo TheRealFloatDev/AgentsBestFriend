@@ -25,8 +25,9 @@
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
+    "@abf/core": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@abf/core": "*",
+    "drizzle-orm": "^0.38.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {

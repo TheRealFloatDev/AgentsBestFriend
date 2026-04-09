@@ -6,6 +6,9 @@
     "abf": "./dist/index.js",
     "agents-best-friend": "./dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -13,19 +16,23 @@
     }
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
-    "@abf/core": "*",
-    "@abf/server": "*",
+    "@abf/core": "workspace:*",
+    "@abf/server": "workspace:*",
     "@clack/prompts": "^0.9.0",
-    "commander": "^13.0.0"
+    "better-sqlite3": "^11.7.0",
+    "commander": "^13.0.0",
+    "ts-morph": "^27.0.2"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "tsup": "^8.0.0",
     "vitest": "^3.0.0"
   }
 }

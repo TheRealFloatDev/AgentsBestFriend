@@ -1,16 +1,14 @@
 {
   "name": "agents-best-friend",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
     "test": "turbo test",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "release": "turbo build && cd packages/cli && pnpm publish"
   },
   "devDependencies": {
     "turbo": "^2.4.0",
@@ -20,5 +18,5 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "pnpm@10.7.1"
 }
