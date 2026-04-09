@@ -1,5 +1,12 @@
 # @abf/server
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @abf/core@0.7.1
+
 ## 0.6.0
 
 ### Minor Changes

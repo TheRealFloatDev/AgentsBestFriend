@@ -1,5 +1,11 @@
 # @abf/core
 
+## 0.7.1
+
+### Patch Changes
+
+- Fixed issues with embedding generation for large files
+
 ## 0.7.0
 
 ### Minor Changes

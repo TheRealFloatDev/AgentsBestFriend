@@ -70,10 +70,10 @@ Summary:`;
   }
 
   async generateEmbedding(text: string): Promise<Float32Array> {
-    // nomic-embed-text supports ~8192 tokens. We chunk at ~3500 chars
-    // (≈ 1000 tokens) to stay safely within the limit, embed each chunk,
+    // nomic-embed-text supports ~8192 tokens. We chunk at ~2000 chars
+    // (well within the limit even for dense/minified code), embed each chunk,
     // then mean-pool the vectors into a single embedding.
-    const chunkSize = 3500;
+    const chunkSize = 2000;
     const chunks: string[] = [];
 
     if (text.length <= chunkSize) {
@@ -100,6 +100,10 @@ Summary:`;
 
       if (!res.ok) {
         const body = await res.text();
+        // 4xx = bad input for this specific text, not a provider-level failure
+        if (res.status >= 400 && res.status < 500) {
+          throw new Error(`embed ${res.status}: ${body}`);
+        }
         throw new LlmUnavailableError("ollama", `embed ${res.status}: ${body}`);
       }
 
