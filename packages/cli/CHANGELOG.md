@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.3.0
+
+### Minor Changes
+
+- Improved parameter consistency, llm summary generation
+
 ## 0.2.0
 
 ### Minor Changes
