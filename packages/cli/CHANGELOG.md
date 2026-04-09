@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.6.1
+
+### Patch Changes
+
+- Added mcp registry
+
 ## 0.6.0
 
 ### Minor Changes

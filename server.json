@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.TheRealFloatDev/agentsbestfriend",
+  "description": "MCP that provides fast, token-efficient tools for navigating, searching, and understanding codebases",
+  "repository": {
+    "url": "https://github.com/TheRealFloatDev/AgentsBestFriend",
+    "source": "github"
+  },
+  "version": "0.6.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "agentsbestfriend",
+      "version": "0.6.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "The root directory of the project that the server will interact with. Defaults to the current working directory if not set.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "ABF_PROJECT_ROOT"
+        }
+      ]
+    }
+  ]
+}

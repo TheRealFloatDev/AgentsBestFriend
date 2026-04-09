@@ -20,3 +20,5 @@ Thumbs.db
 coverage/
 *.log
 .turbo
+.mcpregistry_github_token
+.mcpregistry_registry_token
