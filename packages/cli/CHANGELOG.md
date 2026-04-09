@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.6.0
+
+### Minor Changes
+
+- Embeddings are now chunked and pooled to get all data with limited context window
+
 ## 0.5.0
 
 ### Minor Changes
