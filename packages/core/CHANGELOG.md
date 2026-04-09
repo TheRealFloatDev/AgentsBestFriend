@@ -1,5 +1,11 @@
 # @abf/core
 
+## 0.4.0
+
+### Minor Changes
+
+- Minor bug fixes, implemented watcher for index updating
+
 ## 0.3.0
 
 ### Minor Changes

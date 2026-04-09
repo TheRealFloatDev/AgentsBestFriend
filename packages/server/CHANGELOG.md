@@ -1,5 +1,16 @@
 # @abf/server
 
+## 0.4.0
+
+### Minor Changes
+
+- Minor bug fixes, implemented watcher for index updating
+
+### Patch Changes
+
+- Updated dependencies
+  - @abf/core@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes
