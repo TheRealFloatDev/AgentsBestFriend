@@ -1,5 +1,16 @@
 # @abf/server
 
+## 0.7.0
+
+### Minor Changes
+
+- Added new abf_context_bundle tool
+
+### Patch Changes
+
+- Updated dependencies
+  - @abf/core@0.8.0
+
 ## 0.6.1
 
 ### Patch Changes

@@ -15,3 +15,11 @@ export type {
   SymbolKind,
   LanguageParser,
 } from "./parser-types.js";
+export {
+  buildContextBundle,
+  formatContextBundle,
+  type ContextBundleOptions,
+  type ContextBundleResult,
+  type BundledFile,
+  type BundleInclude,
+} from "./context-bundle.js";

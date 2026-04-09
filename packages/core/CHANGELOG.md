@@ -1,5 +1,11 @@
 # @abf/core
 
+## 0.8.0
+
+### Minor Changes
+
+- Added new abf_context_bundle tool
+
 ## 0.7.1
 
 ### Patch Changes

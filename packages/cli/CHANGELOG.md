@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.10.0
+
+### Minor Changes
+
+- Added new abf_context_bundle tool
+
 ## 0.9.0
 
 ### Minor Changes
