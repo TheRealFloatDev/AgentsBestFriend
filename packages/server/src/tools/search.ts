@@ -16,7 +16,7 @@ export function registerSearchTool(server: McpServer): void {
 - "keyword": Exploratory search — splits the query into keywords, scores every file by keyword density, returns the top matching files ranked by relevance. Best when you're not sure of exact names.
 - "semantic": (Requires Ollama + embeddings index) Embedding-based similarity search. Falls back to keyword mode if unavailable.
 
-Use "exact" when you know what to search for. Use "keyword" when exploring or looking for files related to a concept.`,
+Use "exact" when you EXACTLY know what to search for. Use "keyword" when exploring or looking for files related to a concept.`,
     {
       query: z
         .string()
@@ -25,7 +25,7 @@ Use "exact" when you know what to search for. Use "keyword" when exploring or lo
         ),
       mode: z
         .enum(["exact", "keyword", "semantic"])
-        .default("exact")
+        .default("keyword")
         .describe(
           'Search mode: "exact" (ripgrep), "keyword" (file scoring), or "semantic" (embedding similarity)',
         ),
