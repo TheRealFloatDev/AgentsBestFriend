@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "abf": {
-      "command": "abf",
+      "command": "npx",
       "args": [
+        "-y",
+        "agentsbestfriend",
         "start"
       ]
     }
