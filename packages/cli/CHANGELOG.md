@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.9.0
+
+### Minor Changes
+
+- Added advanced mcp installation options in init flow
+
 ## 0.8.0
 
 ### Minor Changes

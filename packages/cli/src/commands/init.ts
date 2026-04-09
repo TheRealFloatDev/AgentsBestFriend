@@ -180,7 +180,31 @@ export async function initCommand(projectPath: string): Promise<void> {
     return;
   }
 
-  const addMcpArgs = ["add-mcp", "abf start", "--name", "abf", "-y"];
+  const mcpSource = await clack.select({
+    message: "How should agents run ABF?",
+    options: [
+      {
+        value: "npx",
+        label: "npx (recommended)",
+        hint: "Always uses the latest version via npx agentsbestfriend start",
+      },
+      {
+        value: "local",
+        label: "Local install",
+        hint: "Uses your locally installed abf binary",
+      },
+    ],
+  });
+
+  if (clack.isCancel(mcpSource)) {
+    clack.outro(isNew ? "Project initialized!" : "Index rebuilt!");
+    return;
+  }
+
+  const mcpCommand =
+    mcpSource === "npx" ? "npx agentsbestfriend start" : "abf start";
+
+  const addMcpArgs = ["add-mcp", mcpCommand, "--name", "abf", "-y"];
   for (const agent of selectedAgents) {
     addMcpArgs.push("-a", agent);
   }
@@ -199,14 +223,20 @@ export async function initCommand(projectPath: string): Promise<void> {
       timeout: 60_000,
     });
     mcpSpinner.stop("MCP server installed successfully");
-    clack.log.info(
-      `Agents can now use ABF via the "abf start" command.\nMake sure abf is installed globally: npm install -g agentsbestfriend`,
-    );
+    if (mcpSource === "npx") {
+      clack.log.info(
+        `Agents will use ABF via "npx agentsbestfriend start" (always latest version).`,
+      );
+    } else {
+      clack.log.info(
+        `Agents will use ABF via "abf start".\nMake sure abf is installed globally: npm install -g agentsbestfriend`,
+      );
+    }
   } catch (err) {
     mcpSpinner.stop("MCP installation failed");
     const msg = err instanceof Error ? err.message : String(err);
     clack.log.warn(
-      `Could not install MCP server: ${msg}\nYou can install manually: npx add-mcp "abf start" --name abf -y`,
+      `Could not install MCP server: ${msg}\nYou can install manually: npx add-mcp "${mcpCommand}" --name abf -y`,
     );
   }
 
