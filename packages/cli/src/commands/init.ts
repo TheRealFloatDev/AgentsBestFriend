@@ -2,6 +2,11 @@ import * as clack from "@clack/prompts";
 import { resolve } from "node:path";
 import { existsSync, mkdirSync } from "node:fs";
 import { runIndexPipeline } from "@abf/core/indexer";
+import {
+  getLlmProvider,
+  generateSummaries,
+  generateEmbeddings,
+} from "@abf/core/llm";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -67,6 +72,36 @@ export async function initCommand(projectPath: string): Promise<void> {
       .filter(Boolean)
       .join("\n  "),
   );
+
+  // --- LLM enrichment (summaries + embeddings) ---
+  const provider = getLlmProvider();
+  if (provider && (await provider.isAvailable())) {
+    const llmSpinner = clack.spinner();
+    llmSpinner.start("Generating LLM summaries...");
+    try {
+      const sumStats = await generateSummaries(root);
+      llmSpinner.stop(
+        `Summaries: ${sumStats.generated} generated, ${sumStats.skipped} skipped (${sumStats.durationMs}ms)`,
+      );
+    } catch {
+      llmSpinner.stop("Summary generation failed (Ollama error)");
+    }
+
+    const embSpinner = clack.spinner();
+    embSpinner.start("Generating embeddings...");
+    try {
+      const embStats = await generateEmbeddings(root);
+      embSpinner.stop(
+        `Embeddings: ${embStats.generated} generated, ${embStats.skipped} skipped (${embStats.durationMs}ms)`,
+      );
+    } catch {
+      embSpinner.stop("Embedding generation failed (Ollama error)");
+    }
+  } else {
+    clack.log.info(
+      "LLM enrichment skipped (Ollama not available). Run `abf index --summarize` later.",
+    );
+  }
 
   // --- MCP installation via add-mcp ---
   const installMcp = await clack.confirm({

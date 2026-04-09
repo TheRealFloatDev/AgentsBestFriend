@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { watchProject } from "@abf/core/indexer";
 import { registerPingTool } from "./tools/ping.js";
 import { registerSearchTool } from "./tools/search.js";
 import { registerProjectOverviewTool } from "./tools/project-overview.js";
@@ -13,7 +14,7 @@ import { registerFileSummaryTool } from "./tools/file-summary.js";
 import { registerConventionsTool } from "./tools/conventions.js";
 
 const SERVER_NAME = "agents-best-friend";
-const SERVER_VERSION = "0.1.0";
+const SERVER_VERSION = __ABF_VERSION__;
 
 /**
  * Create and configure the ABF MCP server with all tools registered.
@@ -54,9 +55,25 @@ export function createAbfServer(): McpServer {
 /**
  * Create the server and start listening on stdio transport.
  * This is the main entry point for MCP agent connections.
+ * Also starts a file watcher to keep the index current.
  */
 export async function startStdioServer(): Promise<void> {
   const server = createAbfServer();
   const transport = new StdioServerTransport();
+
+  // Start file watcher for incremental index updates
+  const projectRoot = process.env.ABF_PROJECT_ROOT || process.cwd();
+  const watcher = watchProject(projectRoot);
+
+  // Clean up watcher on exit
+  process.on("SIGINT", () => {
+    watcher.close();
+    process.exit(0);
+  });
+  process.on("SIGTERM", () => {
+    watcher.close();
+    process.exit(0);
+  });
+
   await server.connect(transport);
 }

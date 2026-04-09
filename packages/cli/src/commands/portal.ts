@@ -3,7 +3,11 @@ import { resolve } from "node:path";
 import { loadConfig, updateConfig, getConfigPath } from "@abf/core/config";
 import { getIndexStatus, runIndexPipeline } from "@abf/core/indexer";
 import { isRipgrepAvailable } from "@abf/core/search";
-import { getLlmProvider } from "@abf/core/llm";
+import {
+  getLlmProvider,
+  generateSummaries,
+  generateEmbeddings,
+} from "@abf/core/llm";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -191,6 +195,34 @@ async function reindex(): Promise<void> {
         `Time: ${stats.durationMs}ms`,
       ].join("\n  "),
     );
+
+    // LLM enrichment (summaries + embeddings)
+    const provider = getLlmProvider();
+    if (provider && (await provider.isAvailable())) {
+      const llmSpinner = clack.spinner();
+      llmSpinner.start("Generating LLM summaries...");
+      try {
+        const sumStats = await generateSummaries(root);
+        llmSpinner.stop(
+          `Summaries: ${sumStats.generated} generated, ${sumStats.skipped} skipped (${sumStats.durationMs}ms)`,
+        );
+      } catch {
+        llmSpinner.stop("Summary generation failed");
+      }
+
+      const embSpinner = clack.spinner();
+      embSpinner.start("Generating embeddings...");
+      try {
+        const embStats = await generateEmbeddings(root);
+        embSpinner.stop(
+          `Embeddings: ${embStats.generated} generated, ${embStats.skipped} skipped (${embStats.durationMs}ms)`,
+        );
+      } catch {
+        embSpinner.stop("Embedding generation failed");
+      }
+    } else {
+      clack.log.info("LLM enrichment skipped (Ollama not available).");
+    }
   } catch (error: any) {
     s.stop("Error");
     clack.log.error(error.message);

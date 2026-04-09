@@ -232,7 +232,7 @@ export async function getIndexStatus(
 
 // ─── Symbol & Import Indexing ────────────────────────────────────────────────
 
-function indexSymbolsAndImports(
+export function indexSymbolsAndImports(
   db: ProjectDb,
   fileId: number,
   filePath: string,

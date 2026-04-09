@@ -8,7 +8,7 @@ const program = new Command();
 program
   .name("abf")
   .description("AgentsBestFriend — AI-first code navigation and analysis tools")
-  .version("0.1.0");
+  .version(__ABF_VERSION__);
 
 program
   .command("start")

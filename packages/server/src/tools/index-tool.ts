@@ -1,7 +1,11 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { runIndexPipeline, getIndexStatus } from "@abf/core/indexer";
-import { generateSummaries, getLlmProvider } from "@abf/core/llm";
+import {
+  generateSummaries,
+  generateEmbeddings,
+  getLlmProvider,
+} from "@abf/core/llm";
 
 const IndexActionSchema = z.enum(["status", "rebuild", "update", "summarize"]);
 
@@ -50,7 +54,7 @@ export function registerIndexTool(server: McpServer): void {
               stats.errors > 0 ? `Errors: ${stats.errors}` : null,
             ].filter(Boolean);
 
-            // Auto-generate summaries if Ollama is available
+            // Auto-generate summaries + embeddings if Ollama is available
             const provider = getLlmProvider();
             if (provider && (await provider.isAvailable())) {
               try {
@@ -62,6 +66,15 @@ export function registerIndexTool(server: McpServer): void {
               } catch {
                 textParts.push("", "LLM summaries: skipped (Ollama error)");
               }
+
+              try {
+                const embStats = await generateEmbeddings(projectRoot);
+                textParts.push(
+                  `Embeddings: ${embStats.generated} generated, ${embStats.skipped} skipped${embStats.errors > 0 ? `, ${embStats.errors} errors` : ""} (${embStats.durationMs}ms)`,
+                );
+              } catch {
+                textParts.push("Embeddings: skipped (Ollama error)");
+              }
             }
 
             return {
@@ -70,14 +83,20 @@ export function registerIndexTool(server: McpServer): void {
           }
 
           case "summarize": {
-            const stats = await generateSummaries(projectRoot);
+            const sumStats = await generateSummaries(projectRoot);
+            const embStats = await generateEmbeddings(projectRoot);
             const text = [
-              `Summary generation complete (${stats.durationMs}ms)`,
-              `Generated: ${stats.generated}`,
-              `Skipped (already have summary): ${stats.skipped}`,
-              stats.errors > 0 ? `Errors: ${stats.errors}` : null,
+              `Summary generation complete (${sumStats.durationMs}ms)`,
+              `  Generated: ${sumStats.generated}`,
+              `  Skipped: ${sumStats.skipped}`,
+              sumStats.errors > 0 ? `  Errors: ${sumStats.errors}` : null,
+              "",
+              `Embedding generation complete (${embStats.durationMs}ms)`,
+              `  Generated: ${embStats.generated}`,
+              `  Skipped: ${embStats.skipped}`,
+              embStats.errors > 0 ? `  Errors: ${embStats.errors}` : null,
             ]
-              .filter(Boolean)
+              .filter((l) => l !== null)
               .join("\n");
 
             return { content: [{ type: "text" as const, text }] };

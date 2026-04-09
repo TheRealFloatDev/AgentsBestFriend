@@ -6,6 +6,7 @@ export {
 export {
   runIndexPipeline,
   getIndexStatus,
+  indexSymbolsAndImports,
   type IndexStats,
   type IndexStatus,
 } from "./pipeline.js";

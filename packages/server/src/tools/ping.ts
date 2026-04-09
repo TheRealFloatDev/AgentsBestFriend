@@ -21,7 +21,7 @@ export function registerPingTool(server: McpServer): void {
       const status: Record<string, unknown> = {
         status: "ok",
         server: "agents-best-friend",
-        version: "0.1.0",
+        version: __ABF_VERSION__,
         projectRoot,
         timestamp: new Date().toISOString(),
       };

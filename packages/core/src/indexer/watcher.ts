@@ -11,6 +11,7 @@ import {
   isBinaryFile,
 } from "../utils/index.js";
 import { loadConfig } from "../config/manager.js";
+import { indexSymbolsAndImports } from "./pipeline.js";
 
 export interface WatcherHandle {
   close(): void;
@@ -127,8 +128,19 @@ async function handleChange(
         })
         .where(eq(files.path, relPath))
         .run();
+
+      // Re-parse symbols and imports for updated file
+      const fileRow = db
+        .select({ id: files.id })
+        .from(files)
+        .where(eq(files.path, relPath))
+        .get();
+      if (fileRow) {
+        indexSymbolsAndImports(db, fileRow.id, relPath, content);
+      }
     } else {
-      db.insert(files)
+      const result = db
+        .insert(files)
         .values({
           path: relPath,
           contentHash: hash,
@@ -139,6 +151,10 @@ async function handleChange(
           lastModifiedAt: new Date(st.mtimeMs),
         })
         .run();
+
+      // Parse symbols and imports for new file
+      const fileId = Number(result.lastInsertRowid);
+      indexSymbolsAndImports(db, fileId, relPath, content);
     }
   } finally {
     closeDb(db);
