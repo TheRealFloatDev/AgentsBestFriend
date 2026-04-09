@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.1.4
+
+### Patch Changes
+
+- Fixed issue with abf_dependencies
+
 ## 0.1.3
 
 ### Patch Changes

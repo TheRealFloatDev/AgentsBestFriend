@@ -3,6 +3,7 @@ import { z } from "zod";
 import { readFileSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { existsSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { parseFile } from "@abf/core/analysis";
 
 export function registerDependenciesTool(server: McpServer): void {
@@ -108,7 +109,6 @@ interface ImportedByEntry {
 
 function findImportedBy(cwd: string, targetRelPath: string): ImportedByEntry[] {
   // Read all files from git ls-files and check their imports
-  const { execFileSync } = require("node:child_process");
   let filePaths: string[];
   try {
     const stdout = execFileSync(

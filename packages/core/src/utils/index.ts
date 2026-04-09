@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, openSync, readSync, closeSync } from "node:fs";
 import { extname } from "node:path";
 
 /**
@@ -112,9 +112,9 @@ export function countLines(content: string): number {
 export function isBinaryFile(filePath: string): boolean {
   try {
     const buffer = Buffer.alloc(8192);
-    const fd = require("node:fs").openSync(filePath, "r");
-    const bytesRead = require("node:fs").readSync(fd, buffer, 0, 8192, 0);
-    require("node:fs").closeSync(fd);
+    const fd = openSync(filePath, "r");
+    const bytesRead = readSync(fd, buffer, 0, 8192, 0);
+    closeSync(fd);
 
     // Check for null bytes in the first chunk
     for (let i = 0; i < bytesRead; i++) {
