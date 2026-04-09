@@ -210,7 +210,7 @@ export async function initCommand(projectPath: string): Promise<void> {
   }
 
   const mcpCommand =
-    mcpSource === "npx" ? "npx agentsbestfriend start" : "abf start";
+    mcpSource === "npx" ? "npx -y agentsbestfriend start" : "abf start";
 
   const addMcpArgs = ["add-mcp", mcpCommand, "--name", "abf", "-y"];
   for (const agent of selectedAgents) {
