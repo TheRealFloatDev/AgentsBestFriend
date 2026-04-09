@@ -1,6 +1,6 @@
 import * as clack from "@clack/prompts";
 import { resolve } from "node:path";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, appendFileSync } from "node:fs";
 import { runIndexPipeline } from "@abf/core/indexer";
 import {
   getLlmProvider,
@@ -43,6 +43,28 @@ export async function initCommand(projectPath: string): Promise<void> {
     clack.log.info(`Created ${abfDir}`);
   } else {
     clack.log.info(`ABF directory already exists at ${abfDir}`);
+  }
+
+  // --- Add .abf/ to .gitignore ---
+  const gitignorePath = resolve(root, ".gitignore");
+  const gitignoreExists = existsSync(gitignorePath);
+  const alreadyIgnored =
+    gitignoreExists &&
+    readFileSync(gitignorePath, "utf-8")
+      .split("\n")
+      .some((line) => line.trim() === ".abf" || line.trim() === ".abf/");
+
+  if (!alreadyIgnored) {
+    const addToGitignore = await clack.confirm({
+      message: "Add .abf/ to .gitignore?",
+      initialValue: true,
+    });
+
+    if (!clack.isCancel(addToGitignore) && addToGitignore) {
+      const block = `${gitignoreExists ? "\n" : ""}# AgentsBestFriend (MCP) local index\n.abf/\n`;
+      appendFileSync(gitignorePath, block, "utf-8");
+      clack.log.info(".abf/ added to .gitignore");
+    }
   }
 
   const s = clack.spinner();

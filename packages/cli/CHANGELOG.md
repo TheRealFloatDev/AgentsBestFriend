@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.8.0
+
+### Minor Changes
+
+- Added automatic gitignore support
+
 ## 0.7.2
 
 ### Patch Changes
