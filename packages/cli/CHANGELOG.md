@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.11.0
+
+### Minor Changes
+
+- Added skill setup
+
 ## 0.10.0
 
 ### Minor Changes
