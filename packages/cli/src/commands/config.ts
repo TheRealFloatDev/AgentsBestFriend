@@ -53,6 +53,7 @@ export async function configCommand(): Promise<void> {
         message: "Ollama base URL:",
         initialValue: config.llm.ollama.baseUrl,
         validate: (v) => {
+          if (!v) return "URL is required";
           try {
             new URL(v);
           } catch {
@@ -96,6 +97,8 @@ export async function configCommand(): Promise<void> {
       message: "Portal port:",
       initialValue: String(config.portal.port),
       validate: (v) => {
+        if (!v) return "Port is required";
+
         const n = parseInt(v, 10);
         if (isNaN(n) || n < 1024 || n > 65535) {
           return "Must be a number between 1024 and 65535";
@@ -113,6 +116,7 @@ export async function configCommand(): Promise<void> {
       message: "Max file size (KB):",
       initialValue: String(config.indexing.maxFileSizeKb),
       validate: (v) => {
+        if (!v) return "Max file size is required";
         const n = parseInt(v, 10);
         if (isNaN(n) || n < 1) return "Must be a positive number";
       },

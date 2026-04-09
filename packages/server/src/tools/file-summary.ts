@@ -1,8 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { createProjectDb, closeDb } from "@abf/core/db";
-import { sql } from "drizzle-orm";
-import { files } from "@abf/core/db";
+import { createProjectDb, closeDb, sql, files } from "@abf/core/db";
 
 export function registerFileSummaryTool(server: McpServer): void {
   server.tool(

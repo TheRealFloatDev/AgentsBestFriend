@@ -48,13 +48,13 @@
   "dependencies": {
     "@abf/core": "workspace:*",
     "@abf/server": "workspace:*",
-    "@clack/prompts": "^0.9.0",
-    "better-sqlite3": "^11.7.0",
-    "commander": "^13.0.0",
+    "@clack/prompts": "^1.2.0",
+    "better-sqlite3": "^12.8.0",
+    "commander": "^14.0.3",
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.0",
+    "@types/better-sqlite3": "^7.6.13",
     "tsup": "^8.5.1",
     "vitest": "^3.0.0"
   }

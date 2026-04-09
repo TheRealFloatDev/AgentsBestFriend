@@ -49,16 +49,16 @@
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
-    "better-sqlite3": "^11.7.0",
-    "drizzle-orm": "^0.38.0",
-    "glob": "^11.0.0",
-    "ignore": "^7.0.0",
+    "better-sqlite3": "^12.8.0",
+    "drizzle-orm": "^0.45.2",
+    "glob": "^13.0.6",
+    "ignore": "^7.0.5",
     "ts-morph": "^27.0.2",
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.0",
-    "drizzle-kit": "^0.30.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "drizzle-kit": "^0.31.10",
     "vitest": "^3.0.0"
   }
 }

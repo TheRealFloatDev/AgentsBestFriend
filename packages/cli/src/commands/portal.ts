@@ -236,7 +236,7 @@ async function editConfig(): Promise<void> {
         initialValue: config.llm.ollama.baseUrl,
         validate: (v) => {
           try {
-            new URL(v);
+            new URL(v ?? "");
           } catch {
             return "Must be a valid URL";
           }
@@ -277,7 +277,7 @@ async function editConfig(): Promise<void> {
       message: "Max file size (KB):",
       initialValue: String(config.indexing.maxFileSizeKb),
       validate: (v) => {
-        const n = parseInt(v, 10);
+        const n = parseInt(v ?? "", 10);
         if (isNaN(n) || n < 1) return "Must be a positive number";
       },
     });
