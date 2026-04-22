@@ -1,92 +1,68 @@
 # AgentsBestFriend (abf)
 
-A local [MCP](https://modelcontextprotocol.io/) server that gives AI coding agents fast, token-efficient tools for navigating, searching, and understanding codebases — including monorepos.
+Give your AI coding agents superpowers — a local [MCP](https://modelcontextprotocol.io/) server for fast, token-efficient code navigation, search & analysis.
 
-Works with **VS Code Copilot**, **Cursor**, **Claude Desktop/Code**, **Windsurf**, and any other MCP-compatible agent.
+Works with **VS Code Copilot**, **Cursor**, **Claude Code/Desktop**, **Codex**, **Cline**, **Zed**, **Gemini CLI**, **Goose**, **OpenCode**, and any other MCP-compatible agent.
 
 ---
 
 ## Why?
 
-AI coding agents waste tokens re-reading files, searching blindly, and losing context. ABF provides purpose-built tools that return exactly what the agent needs in compact, structured responses:
+AI coding agents waste tokens re-reading files and searching blindly. ABF gives them purpose-built tools that return exactly what they need — in compact, structured responses that preserve context.
 
-- **Fast search** — ripgrep-powered exact search, keyword-scored file ranking, and embedding-based semantic search
-- **Code intelligence** — AST-based symbol extraction for TS/JS/Python, import/dependency mapping, impact analysis
-- **Project awareness** — auto-detected tech stack, conventions, folder structure
-- **LLM enrichment** — optional Ollama-powered file summaries and embeddings for semantic navigation
-- **Zero config** — auto-initializes on first use; agents just call tools
-
-## Features
+## Tools
 
 | Tool | What it does |
 |---|---|
-| `abf_search` | Search code (exact/keyword/semantic modes) |
-| `abf_symbols` | List functions, classes, exports in a file |
-| `abf_chunk` | Get a smart chunk of a file by symbol/line range |
-| `abf_project_overview` | Tech stack, structure, dependencies at a glance |
+| `abf_search` | Code search — exact (ripgrep), keyword-ranked, or semantic (embedding-based) |
+| `abf_symbols` | Functions, classes, exports in a file (AST-based for TS/JS, regex for Python) |
+| `abf_chunk` | Smart file chunk by symbol name, chunk index, or file overview |
+| `abf_project_overview` | Tech stack, folder structure, key dependencies at a glance |
 | `abf_dependencies` | Import graph — who imports what |
 | `abf_impact` | Find all usages of a symbol across the project |
-| `abf_git` | Commits, blame, diff (recent/staged/unstaged) |
-| `abf_file_summary` | Search LLM-generated file summaries (FTS5) |
-| `abf_conventions` | Detected naming, structure, pattern, formatting conventions |
-| `abf_index` | Index status, rebuild, incremental update |
-| `abf_ping` | Health check |
+| `abf_git` | Git log, blame, diff (recent/staged/unstaged) |
+| `abf_file_summary` | Full-text search across LLM-generated file summaries (FTS5, OR/AND mode) |
+| `abf_conventions` | Detected naming, structure, and formatting conventions |
+| `abf_index` | Index status, rebuild, incremental update, or trigger re-summarization |
+| `abf_ping` | Health check — returns version and project root |
 
-## Quick Start
+## Install
+
+```bash
+npm install -g agentsbestfriend
+```
 
 ### Prerequisites
 
 - **Node.js** ≥ 20
 - **ripgrep** — `brew install ripgrep` (macOS) / `apt install ripgrep` (Linux)
-- **git** (for git tools & file discovery)
+- **git**
 - **Ollama** (optional) — for summaries & semantic search: [ollama.com](https://ollama.com)
 
-### Install & Run
+## Quick Start
 
 ```bash
-# Clone
-git clone https://github.com/yourname/AgentsBestFriend.git
-cd AgentsBestFriend
-
-# Install dependencies
-npm install
-
-# Build all packages
-npx turbo build
-
-# Check system health
-node packages/cli/dist/index.js doctor
+abf init
 ```
 
-### Connect to Your Agent
+`abf init` walks you through everything:
 
-Add ABF as an MCP server in your agent's config:
+1. **Indexes your project** — discovers and indexes all files via `git ls-files`
+2. **Generates LLM summaries & embeddings** (if Ollama is running) — with live `(12/80)` progress
+3. **Adds `.abf/` to `.gitignore`** — prompts before writing
+4. **Installs ABF as an MCP server** for your agents — you pick which agents (Cursor, VS Code, Claude Code, etc.) and whether to use `npx agentsbestfriend start` (always latest) or `abf start` (local install)
 
-**VS Code Copilot** (`.vscode/mcp.json`):
+### Manual Agent Setup
+
+If you prefer to configure manually, add ABF as a stdio MCP server. Using `npx` is recommended — it always runs the latest published version without requiring a global install:
+
+**VS Code / GitHub Copilot** (`.vscode/mcp.json`):
 ```json
 {
   "servers": {
     "abf": {
-      "command": "node",
-      "args": ["/path/to/AgentsBestFriend/packages/cli/dist/index.js", "start"],
-      "env": {
-        "ABF_PROJECT_ROOT": "${workspaceFolder}"
-      }
-    }
-  }
-}
-```
-
-**Claude Desktop** (`claude_desktop_config.json`):
-```json
-{
-  "mcpServers": {
-    "abf": {
-      "command": "node",
-      "args": ["/path/to/AgentsBestFriend/packages/cli/dist/index.js", "start"],
-      "env": {
-        "ABF_PROJECT_ROOT": "/path/to/your/project"
-      }
+      "command": "npx",
+      "args": ["agentsbestfriend", "start"]
     }
   }
 }
@@ -97,84 +73,75 @@ Add ABF as an MCP server in your agent's config:
 {
   "mcpServers": {
     "abf": {
-      "command": "node",
-      "args": ["/path/to/AgentsBestFriend/packages/cli/dist/index.js", "start"],
-      "env": {
-        "ABF_PROJECT_ROOT": "/path/to/your/project"
-      }
+      "command": "npx",
+      "args": ["agentsbestfriend", "start"]
     }
   }
 }
 ```
 
-The server auto-initializes an `.abf/` directory with a SQLite index on first tool call.
-
-## CLI
-
-```
-abf start        Start MCP server (stdio mode — used by agents)
-abf init [path]  Initialize index for a project
-abf index [path] Re-index a project
-abf status [path] Show index status
-abf config       Interactive configuration editor
-abf doctor       System health checks
-abf portal       Interactive terminal dashboard
+**Claude Desktop** (`claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "abf": {
+      "command": "npx",
+      "args": ["agentsbestfriend", "start"]
+    }
+  }
+}
 ```
 
-## Architecture
+> Set `ABF_PROJECT_ROOT` in the `env` block if the agent does not pass its working directory automatically.
+
+## CLI Commands
 
 ```
-AgentsBestFriend/
-├── packages/
-│   ├── core/         Shared logic — DB, config, search, analysis, indexer, LLM
-│   ├── server/       MCP server with all 11 tools
-│   ├── cli/          Commander.js CLI + interactive TUI portal
-│   └── portal/       (placeholder — UI logic lives in CLI TUI)
-├── turbo.json        Turborepo build config
-└── package.json      npm workspaces root
+abf start          Start MCP server in stdio mode (used by agents)
+abf init [path]    Index project, set up .gitignore entry, install MCP for agents
+abf index [path]   Re-index a project (incremental by default)
+abf status [path]  Show index stats
+abf config         Interactive configuration editor
+abf doctor         Health checks (Node, ripgrep, git, Ollama)
+abf portal         Interactive TUI dashboard
 ```
 
-### Core Modules
+## How It Works
 
-| Module | Purpose |
+ABF maintains a lightweight SQLite index (`.abf/index.db`) inside each project root. The index is built once and updated incrementally — only changed files are re-processed. A file watcher keeps it current as you edit.
+
+| Table | Contents |
 |---|---|
-| `@abf/core/db` | Drizzle ORM + SQLite (WAL mode, FTS5) |
-| `@abf/core/config` | Zod-validated config at `~/.abf/config.json` |
-| `@abf/core/search` | ripgrep, keyword scoring, semantic (cosine similarity) |
-| `@abf/core/analysis` | ts-morph AST parser, regex fallback, conventions detector, project overview |
-| `@abf/core/indexer` | File discovery (git ls-files), incremental pipeline, file watcher |
-| `@abf/core/llm` | Provider interface, Ollama client, summary/embedding pipelines |
-| `@abf/core/git` | Git CLI wrapper (log, blame, diff, history) |
-
-### Database
-
-ABF stores its index in `.abf/index.db` (SQLite) inside each project root:
-
-- **files** — path, hash, language, size, line count, LLM summary
-- **symbols** — functions, classes, interfaces, types with hierarchy
-- **imports** — import/require edges between files
-- **embeddings** — float32 vectors for semantic search
-- **file_chunks** — smart chunks aligned to symbol boundaries
-- **files_fts** — FTS5 full-text search on summaries
+| `files` | Paths, hashes, languages, line counts, LLM summaries |
+| `symbols` | Functions, classes, interfaces, types (AST-extracted) |
+| `imports` | Dependency edges between files |
+| `embeddings` | Float32 vectors for semantic search (chunked for large files) |
+| `file_chunks` | Smart chunks aligned to symbol boundaries |
+| `files_fts` | FTS5 full-text index over summaries |
 
 ## Optional: LLM Enrichment
 
-With [Ollama](https://ollama.com) running locally, ABF can generate:
-
-1. **File summaries** — 2-3 sentence descriptions of each file (default model: `qwen2.5-coder:1.5b`)
-2. **Embeddings** — vector representations for semantic search (default model: `nomic-embed-text`)
+With [Ollama](https://ollama.com) running locally, ABF generates file summaries and embeddings:
 
 ```bash
-# Install Ollama, then pull models
-ollama pull qwen2.5-coder:1.5b
-ollama pull nomic-embed-text
+ollama pull qwen2.5-coder:1.5b    # file summaries
+ollama pull nomic-embed-text       # embeddings / semantic search
 ```
 
-Without Ollama, all other tools work normally. Semantic search falls back to keyword mode.
+Both `abf init` and `abf portal → Re-index` show live progress:
+
+```
+◆  Generating LLM summaries... (14/80)
+◆  Generating embeddings... (28/80)
+```
+
+Large files are automatically split into chunks for embedding — no context-length errors.
+
+Without Ollama, all tools still work normally. Semantic search falls back to keyword mode.
 
 ## Configuration
 
-Global config lives at `~/.abf/config.json`:
+Global config at `~/.abf/config.json`. Edit interactively with `abf config` or via `abf portal`.
 
 ```json
 {
@@ -190,63 +157,60 @@ Global config lives at `~/.abf/config.json`:
     "autoWatch": true,
     "respectGitignore": true,
     "maxFileSizeKb": 512,
-    "excludedPatterns": ["*.min.js", "*.min.css", "*.map", "*.lock", "package-lock.json"]
+    "excludedPatterns": ["*.min.js", "*.min.css", "*.map", "*.lock"]
   },
   "search": {
-    "defaultMaxResults": 20,
-    "ripgrepPath": "rg"
-  },
-  "portal": {
-    "port": 4242
+    "defaultMaxResults": 20
   }
 }
 ```
 
-Edit interactively with `abf config` or `abf portal`.
+## Architecture
 
-## Terminal Portal
-
-```bash
-abf portal
+```
+AgentsBestFriend/
+├── packages/
+│   ├── core/     Shared logic — DB, config, search, analysis, indexer, LLM
+│   ├── server/   MCP server (11 tools)
+│   └── cli/      Commander.js CLI + TUI portal
+├── turbo.json
+└── package.json
 ```
 
-Interactive TUI dashboard powered by [@clack/prompts](https://github.com/bombshell-dev/clack):
+Built with Turborepo + pnpm workspaces. Core modules:
 
-- **Dashboard** — system overview, health checks, LLM status, project index stats
-- **Project Status** — detailed index info for any project path
-- **Re-index** — trigger a full re-index from the menu
-- **Configuration** — edit LLM provider, indexing, and other settings
-- **Doctor** — health checks for Node.js, ripgrep, git, Ollama
-
-## Tech Stack
-
-- **Runtime:** Node.js ≥ 20, TypeScript (NodeNext)
-- **Build:** Turborepo + npm workspaces
-- **MCP:** `@modelcontextprotocol/sdk` v1.x
-- **Database:** Drizzle ORM + better-sqlite3 (WAL, FTS5)
-- **AST:** ts-morph (TypeScript/JavaScript)
-- **Search:** ripgrep + custom keyword scorer + cosine similarity
-- **CLI:** Commander.js + @clack/prompts
-- **LLM:** Ollama (local, optional)
+| Module | Purpose |
+|---|---|
+| `@abf/core/db` | Drizzle ORM + SQLite (WAL, FTS5) |
+| `@abf/core/config` | Zod-validated config |
+| `@abf/core/search` | ripgrep, keyword scorer, semantic (cosine similarity) |
+| `@abf/core/analysis` | ts-morph AST, conventions detector, project overview |
+| `@abf/core/indexer` | git ls-files discovery, incremental pipeline, file watcher |
+| `@abf/core/llm` | Ollama client, summary & chunked embedding pipelines |
+| `@abf/core/git` | Git CLI wrapper |
 
 ## Development
 
 ```bash
-# Install
-npm install
+# Install dependencies
+pnpm install
 
-# Build all
-npx turbo build
+# Build all packages
+pnpm build
 
-# Watch mode (rebuild on changes)
-npx turbo dev
+# Watch mode
+pnpm dev
 
-# Type-check without emitting
-npx turbo type-check
-
-# Run tests
-npx turbo test
+# Type-check
+pnpm type-check
 ```
+
+## Links
+
+- **GitHub**: [github.com/TheRealFloatDev/AgentsBestFriend](https://github.com/TheRealFloatDev/AgentsBestFriend)
+- **npm**: [npmjs.com/package/agentsbestfriend](https://npmjs.com/package/agentsbestfriend)
+- **Issues**: [github.com/TheRealFloatDev/AgentsBestFriend/issues](https://github.com/TheRealFloatDev/AgentsBestFriend/issues)
+- **MCP Spec**: [modelcontextprotocol.io](https://modelcontextprotocol.io)
 
 ## License
 

@@ -33,7 +33,8 @@
   },
   "files": [
     "dist",
-    "assets"
+    "assets",
+    "README.md"
   ],
   "exports": {
     ".": {
@@ -42,11 +43,13 @@
     }
   },
   "scripts": {
-    "build": "tsup",
+    "sync-readme": "cp ../../README.md README.md",
+    "build": "npm run sync-readme && tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "prepack": "npm run sync-readme"
   },
   "dependencies": {
     "@clack/prompts": "^1.2.0",
