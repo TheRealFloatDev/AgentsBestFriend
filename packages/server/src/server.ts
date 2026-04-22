@@ -14,6 +14,12 @@ import { registerFileSummaryTool } from "./tools/file-summary.js";
 import { registerConventionsTool } from "./tools/conventions.js";
 import { registerContextBundleTool } from "./tools/context-bundle.js";
 import { registerNotesTool } from "./tools/notes.js";
+import { registerPreviewChangesTool } from "./tools/preview-changes.js";
+import { registerRefactorPlanTool } from "./tools/refactor-plan.js";
+import { registerImpactTypedTool } from "./tools/impact-typed.js";
+import { registerBlastRadiusTool } from "./tools/blast-radius.js";
+import { registerRelatedTestsTool } from "./tools/related-tests.js";
+import { registerSearchMultiTool } from "./tools/search-multi.js";
 
 const SERVER_NAME = "agents-best-friend";
 const SERVER_VERSION = __ABF_VERSION__;
@@ -52,6 +58,12 @@ export function createAbfServer(): McpServer {
   registerConventionsTool(server);
   registerContextBundleTool(server);
   registerNotesTool(server);
+  registerPreviewChangesTool(server);
+  registerRefactorPlanTool(server);
+  registerImpactTypedTool(server);
+  registerBlastRadiusTool(server);
+  registerRelatedTestsTool(server);
+  registerSearchMultiTool(server);
 
   return server;
 }

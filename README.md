@@ -15,11 +15,17 @@ AI coding agents waste tokens re-reading files and searching blindly. ABF gives 
 | Tool | What it does |
 |---|---|
 | `abf_search` | Code search — exact (ripgrep), keyword-ranked, or semantic (embedding-based) |
+| `abf_search_multi` | Run multiple search queries (exact/keyword/semantic) in one call with weighted score merging |
 | `abf_symbols` | Functions, classes, exports in a file (AST-based for TS/JS, regex for Python) |
 | `abf_chunk` | Smart file chunk by symbol name, chunk index, or file overview |
 | `abf_project_overview` | Tech stack, folder structure, key dependencies at a glance |
 | `abf_dependencies` | Import graph — who imports what |
 | `abf_impact` | Find all usages of a symbol across the project |
+| `abf_impact_typed` | AST-aware (ts-morph) impact analysis with classified references (definition/call/import/type_ref/jsx) and confidence levels |
+| `abf_blast_radius` | BFS over reverse-import graph for a file with risk scoring (low/medium/high) |
+| `abf_related_tests` | Heuristically rank test files most likely to cover a file or symbol |
+| `abf_preview_changes` | Read-only preview: diff + symbol/import deltas + risk flags + external usage probe (no writes) |
+| `abf_refactor_plan` | Read-only ordered edit plan for rename/move/extract/split with collision detection |
 | `abf_git` | Git log, blame, diff (recent/staged/unstaged) |
 | `abf_file_summary` | Full-text search across LLM-generated file summaries (FTS5, OR/AND mode) |
 | `abf_conventions` | Detected naming, structure, and formatting conventions |

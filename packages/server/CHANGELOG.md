@@ -1,5 +1,11 @@
 # @abf/server
 
+## 0.9.0
+
+### Minor Changes
+
+- Added multiple new tools and a testing strategy
+
 ## 0.8.1
 
 ### Patch Changes

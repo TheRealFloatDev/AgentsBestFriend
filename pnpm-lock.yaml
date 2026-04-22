@@ -94,6 +94,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
+      ts-morph:
+        specifier: ^27.0.2
+        version: 27.0.2
       zod:
         specifier: ^4.3.6
         version: 4.3.6
