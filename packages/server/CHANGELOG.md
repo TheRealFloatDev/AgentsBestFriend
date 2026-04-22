@@ -1,5 +1,13 @@
 # @abf/server
 
+## 0.8.1
+
+### Patch Changes
+
+- Updated README
+- Updated dependencies
+  - @abf/core@0.9.1
+
 ## 0.8.0
 
 ### Minor Changes
