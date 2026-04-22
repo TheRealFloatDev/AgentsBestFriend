@@ -1,7 +1,6 @@
 import * as clack from "@clack/prompts";
-import { resolve, dirname, join } from "node:path";
+import { resolve } from "node:path";
 import { existsSync, mkdirSync, readFileSync, appendFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { runIndexPipeline } from "@abf/core/indexer";
 import {
   getLlmProvider,
@@ -10,6 +9,7 @@ import {
 } from "@abf/core/llm";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { installSkill } from "./skill-cmd.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -249,136 +249,4 @@ export async function initCommand(projectPath: string): Promise<void> {
   }
 
   clack.outro(isNew ? "Project initialized!" : "Index rebuilt!");
-}
-
-// ─── Skill Installation via `npx skills add` ────────────────────────────────
-
-function getSkillDir(): string | null {
-  // The skills asset ships at <package>/assets/skills/ (sibling to dist/)
-  const candidates = [
-    // Installed via npm/npx — assets is sibling to dist/
-    join(dirname(fileURLToPath(import.meta.url)), "..", "assets", "skills"),
-    // Monorepo dev — two levels up from dist/
-    join(
-      dirname(fileURLToPath(import.meta.url)),
-      "..",
-      "..",
-      "assets",
-      "skills",
-    ),
-  ];
-
-  for (const candidate of candidates) {
-    const resolved = resolve(candidate);
-    if (existsSync(join(resolved, "abf", "SKILL.md"))) return resolved;
-  }
-
-  return null;
-}
-
-async function installSkill(projectRoot: string): Promise<void> {
-  const doInstall = await clack.confirm({
-    message:
-      "Install ABF workflow skill? (Helps agents prefer ABF tools over native read_file/grep)",
-    initialValue: true,
-  });
-
-  if (clack.isCancel(doInstall) || !doInstall) return;
-
-  const skillDir = getSkillDir();
-  if (!skillDir) {
-    clack.log.warn("Could not find bundled skill asset — skipping.");
-    return;
-  }
-
-  // All or pick specific agents
-  const agentChoice = await clack.select({
-    message: "Install skill for which agents?",
-    options: [
-      {
-        value: "all",
-        label: "All detected agents",
-        hint: "Auto-detects installed agents",
-      },
-      {
-        value: "pick",
-        label: "Let me pick",
-      },
-    ],
-  });
-
-  if (clack.isCancel(agentChoice)) return;
-
-  let skillAgentArgs: string[] = [];
-
-  if (agentChoice === "pick") {
-    const skillAgents = AGENTS.filter((a) => a.skillAgent);
-    const selected = await clack.multiselect({
-      message: "Which agents should get the ABF skill?",
-      options: skillAgents.map((a) => ({
-        value: a.skillAgent!,
-        label: a.label,
-      })),
-      required: true,
-    });
-
-    if (clack.isCancel(selected)) return;
-
-    for (const agent of selected) {
-      skillAgentArgs.push("-a", agent);
-    }
-  }
-
-  const scope = await clack.select({
-    message: "Skill installation scope?",
-    options: [
-      {
-        value: "project",
-        label: "Project (default)",
-        hint: "Committed with your repo, shared with team",
-      },
-      {
-        value: "global",
-        label: "Global",
-        hint: "Available across all projects",
-      },
-    ],
-  });
-
-  if (clack.isCancel(scope)) return;
-
-  const skillArgs = [
-    "skills",
-    "add",
-    skillDir,
-    "--skill",
-    "abf",
-    "--copy",
-    "-y",
-  ];
-  if (agentChoice === "all") {
-    skillArgs.push("--all");
-  } else {
-    skillArgs.push(...skillAgentArgs);
-  }
-  if (scope === "global") {
-    skillArgs.push("-g");
-  }
-
-  const skillSpinner = clack.spinner();
-  skillSpinner.start("Installing ABF skill...");
-
-  try {
-    await execFileAsync("npx", skillArgs, {
-      cwd: projectRoot,
-      timeout: 60_000,
-    });
-    skillSpinner.stop("ABF skill installed successfully");
-  } catch (err) {
-    skillSpinner.stop("Skill installation failed");
-    const msg = err instanceof Error ? err.message : String(err);
-    clack.log.warn(
-      `Could not install skill: ${msg}\nYou can install manually: npx skills add ${skillDir} --skill abf --copy -y`,
-    );
-  }
 }

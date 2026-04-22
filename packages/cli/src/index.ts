@@ -68,4 +68,15 @@ program
     await doctorCommand();
   });
 
+program
+  .command("skill")
+  .description(
+    "Install or update the ABF workflow skill for your coding agents",
+  )
+  .argument("[path]", "Project path", ".")
+  .action(async (path: string) => {
+    const { skillCommand } = await import("./commands/skill-cmd.js");
+    await skillCommand(path);
+  });
+
 program.parse();

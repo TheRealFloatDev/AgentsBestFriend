@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.13.0
+
+### Minor Changes
+
+- New skill file and skill update command
+
 ## 0.12.1
 
 ### Patch Changes

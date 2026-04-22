@@ -97,13 +97,14 @@ If you prefer to configure manually, add ABF as a stdio MCP server. Using `npx` 
 ## CLI Commands
 
 ```
-abf start          Start MCP server in stdio mode (used by agents)
-abf init [path]    Index project, set up .gitignore entry, install MCP for agents
-abf index [path]   Re-index a project (incremental by default)
-abf status [path]  Show index stats
-abf config         Interactive configuration editor
-abf doctor         Health checks (Node, ripgrep, git, Ollama)
-abf portal         Interactive TUI dashboard
+abf start             Start MCP server in stdio mode (used by agents)
+abf init [path]       Index project, set up .gitignore entry, install MCP for agents
+abf skill [path]      Install or update the ABF workflow skill for your coding agents
+abf index [path]      Re-index a project (incremental by default)
+abf status [path]     Show index stats
+abf config            Interactive configuration editor
+abf doctor            Health checks (Node, ripgrep, git, Ollama)
+abf portal            Interactive TUI dashboard
 ```
 
 ## How It Works
