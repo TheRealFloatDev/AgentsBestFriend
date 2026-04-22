@@ -42,6 +42,11 @@ description: "MANDATORY: AgentsBestFriend (ABF) MCP tools are connected and MUST
 | Find tests covering file/symbol   | `abf_related_tests`         | `abf_search` with manual filtering     |
 | Preview an edit before writing    | `abf_preview_changes`       | guessing — then write & hope           |
 | Plan a rename/move/extract        | `abf_refactor_plan`         | start editing without an ordered plan  |
+| Apply an edit (when writes on)    | `abf_apply_edit`            | unchecked file write                   |
+| Verify TS/JS after editing        | `abf_diagnostics`           | full `tsc` build                       |
+| Jump to a definition (TS/JS)      | `abf_definition`            | `abf_search` + `abf_chunk`             |
+| Get a symbol's type / docs        | `abf_hover`                 | `read_file` + manual type inference    |
+| Trace caller/callee chains        | `abf_call_graph`            | repeated `abf_impact_typed` walks      |
 | Git history / blame / diff        | `abf_git`                   | `run_in_terminal` with git commands    |
 | Index status or rebuild           | `abf_index`                 | nothing                                |
 
@@ -83,14 +88,27 @@ abf_impact (symbol: "functionName")
 For TypeScript/JavaScript projects prefer `abf_impact_typed` — it classifies each
 reference (definition / call / import / type_ref / jsx) with a confidence level.
 
-### Plan → preview → verify (before any non-trivial edit)
+### Plan → preview → apply → verify (the full edit loop)
 
 ```
 1. abf_blast_radius   (file)                ← scope: who breaks if this changes?
-2. abf_refactor_plan  (intent + symbol)     ← ordered, collision-checked edit plan
-3. abf_preview_changes (file, new_content)  ← diff + symbol/import deltas + risk flags
-4. abf_related_tests  (file or symbol)      ← which tests must stay green
+2. abf_call_graph     (symbol)              ← what calls / is called by this code?
+3. abf_refactor_plan  (intent + symbol)     ← ordered, collision-checked edit plan
+4. abf_preview_changes (file, new_content)  ← diff + symbol/import deltas + risk flags
+5. abf_apply_edit     (file, hash, content) ← atomic write (only when ABF_ENABLE_WRITES=1)
+6. abf_diagnostics    (file)                ← TS/JS errors after the write
+7. abf_related_tests  (file or symbol)      ← which tests must stay green
 ```
+
+### Looking up an unknown API (TS/JS)
+
+```
+abf_definition (file, symbol)   ← jump to the declaration
+abf_hover      (file, symbol)   ← exact type signature + JSDoc
+```
+
+Use these two before calling any external function whose shape you are not 100% sure of —
+they prevent the most common hallucination class (invented signatures).
 
 ### Searching for code
 
@@ -213,6 +231,59 @@ and `weight`.
 - Use it when one mode alone gives noisy or partial results.
 - Falls back to `keyword` (with reduced weight) if `semantic` is unavailable.
 - Prefer this over issuing 2–3 separate `abf_search` calls.
+
+### `abf_diagnostics`
+
+TypeScript diagnostics (errors, warnings, suggestions) for one file or all
+git-tracked TS/JS files. Uses ts-morph against the project's `tsconfig.json`
+when present, otherwise reasonable defaults.
+
+- `file_path` — scope to one file (recommended after every TS/JS edit)
+- `max_files` / `max_diagnostics` — caps for large projects
+- `include_warnings` — set to `false` for errors-only output
+- Run this **after `abf_apply_edit`** instead of running a full build.
+
+### `abf_definition`
+
+Goto-definition powered by the TypeScript language service. Returns absolute
+location(s) plus an optional source preview.
+
+- `file_path` + `symbol` — find the named identifier in that file and resolve it
+- `file_path` + `line` + `column` — position-based lookup
+- `preview_lines` — how many lines of source to inline (default 8, set 0 for none)
+- TS/JS only.
+
+### `abf_hover`
+
+Returns the inferred type signature, JSDoc comments, and JSDoc tags for an
+identifier — the IDE-style "hover tooltip" answer.
+
+- Same input shape as `abf_definition` (`file_path` + `symbol` or `line`/`column`)
+- Use it before calling any external API to verify the exact signature instead
+  of guessing.
+
+### `abf_call_graph`
+
+Transitive caller/callee analysis for a function or method (TypeScript /
+JavaScript only). Walks the graph in BFS up to a configurable depth.
+
+- `direction: "callers" | "callees" | "both"` (default `both`)
+- `depth` — 1 to 4 hops
+- Answers "what runs when this is called?" and "who triggers this code?" in one
+  call, instead of repeated `abf_impact_typed` rounds.
+
+### `abf_apply_edit`
+
+The only ABF tool that **writes** to disk. Disabled unless the operator sets
+`ABF_ENABLE_WRITES=1` on the MCP server process. Atomic (writes to a temp file
+and renames) and refuses to overwrite stale content.
+
+- `file_path` + `new_content` — required
+- `expected_old_hash` — sha256 of the current on-disk contents (use `""` for
+  brand-new files combined with `create_if_missing: true`)
+- `dry_run: true` — validate hash and inputs without writing
+- ALWAYS pair with `abf_preview_changes` first, and follow up with
+  `abf_diagnostics` + `abf_related_tests` to verify.
 
 ### `abf_conventions`
 

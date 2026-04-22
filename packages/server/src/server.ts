@@ -20,6 +20,11 @@ import { registerImpactTypedTool } from "./tools/impact-typed.js";
 import { registerBlastRadiusTool } from "./tools/blast-radius.js";
 import { registerRelatedTestsTool } from "./tools/related-tests.js";
 import { registerSearchMultiTool } from "./tools/search-multi.js";
+import { registerDiagnosticsTool } from "./tools/diagnostics.js";
+import { registerDefinitionTool } from "./tools/definition.js";
+import { registerHoverTool } from "./tools/hover.js";
+import { registerApplyEditTool } from "./tools/apply-edit.js";
+import { registerCallGraphTool } from "./tools/call-graph.js";
 
 const SERVER_NAME = "agents-best-friend";
 const SERVER_VERSION = __ABF_VERSION__;
@@ -64,6 +69,11 @@ export function createAbfServer(): McpServer {
   registerBlastRadiusTool(server);
   registerRelatedTestsTool(server);
   registerSearchMultiTool(server);
+  registerDiagnosticsTool(server);
+  registerDefinitionTool(server);
+  registerHoverTool(server);
+  registerApplyEditTool(server);
+  registerCallGraphTool(server);
 
   return server;
 }

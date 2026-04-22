@@ -1,5 +1,11 @@
 # agentsbestfriend
 
+## 0.15.0
+
+### Minor Changes
+
+- Added new tools
+
 ## 0.14.0
 
 ### Minor Changes

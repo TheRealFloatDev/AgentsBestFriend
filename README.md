@@ -26,6 +26,11 @@ AI coding agents waste tokens re-reading files and searching blindly. ABF gives 
 | `abf_related_tests` | Heuristically rank test files most likely to cover a file or symbol |
 | `abf_preview_changes` | Read-only preview: diff + symbol/import deltas + risk flags + external usage probe (no writes) |
 | `abf_refactor_plan` | Read-only ordered edit plan for rename/move/extract/split with collision detection |
+| `abf_apply_edit` | **Write tool** — atomic file write with sha256 hash check (disabled unless `ABF_ENABLE_WRITES=1`) |
+| `abf_diagnostics` | TypeScript diagnostics (errors/warnings) for one file or all tracked TS/JS files |
+| `abf_definition` | Goto-definition via the TypeScript language service — file, line range, and source preview |
+| `abf_hover` | Type signature + JSDoc for an identifier (IDE-style hover) |
+| `abf_call_graph` | Transitive callers/callees of a function or method (TS/JS, ts-morph) |
 | `abf_git` | Git log, blame, diff (recent/staged/unstaged) |
 | `abf_file_summary` | Full-text search across LLM-generated file summaries (FTS5, OR/AND mode) |
 | `abf_conventions` | Detected naming, structure, and formatting conventions |
