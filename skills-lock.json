@@ -2,9 +2,9 @@
   "version": 1,
   "skills": {
     "abf": {
-      "source": "/Users/alexanderneitzel/.nvm/versions/node/v22.16.0/lib/node_modules/agentsbestfriend/assets/skills",
+      "source": "/Users/alexanderneitzel/.npm/_npx/1c78409b1b5b5d90/node_modules/agentsbestfriend/assets/skills",
       "sourceType": "local",
-      "computedHash": "5920521ce8b6bcd35b310b41c3c5de53ed1e91befe462b86d378e867e5491d61"
+      "computedHash": "095ba7808c5ec5c218f9340eb78286177f343cc4d79d49b4ae4d1cc0b6ba6371"
     }
   }
 }
